@@ -13,8 +13,10 @@ class IngredientListViewController: UIViewController {
     private var coordinator: IngredientListCoordinatorProtocol
     private let tableView: UITableView
     private let viewModel: IngredientsListViewModelProtocol
-    
-    // Combine subjects to handle user interactions
+
+    private var dataSource: UITableViewDiffableDataSource<Int, Ingredient>!
+
+    private var addButtonTappedSubject = PassthroughSubject<Void, Never>()
     private var modelDeletedSubject = PassthroughSubject<Ingredient, Never>()
     private var modelSelectedSubject = PassthroughSubject<Ingredient, Never>()
 
@@ -36,10 +38,11 @@ class IngredientListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupCoordinator() // Link the coordinator to the navigation controller
-        setupUI()          // Configure the UI elements
-        setupBindings()    // Bind data and user interactions to Combine publishers
-        viewModel.fetch()  // Trigger initial data fetch
+        setupCoordinator()
+        setupUI()
+        setupDataSource()
+        setupBindings()
+        viewModel.fetch()
     }
 
     private func setupUI() {
@@ -61,7 +64,7 @@ class IngredientListViewController: UIViewController {
     private func setupTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
-        
+
         view.addSubview(tableView)
 
         NSLayoutConstraint.activate([
@@ -72,6 +75,14 @@ class IngredientListViewController: UIViewController {
         ])
     }
 
+    private func setupDataSource() {
+        dataSource = UITableViewDiffableDataSource<Int, Ingredient>(tableView: tableView) { tableView, indexPath, ingredient in
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+            cell.textLabel?.text = ingredient.name
+            return cell
+        }
+    }
+
     private func setupBindings() {
         navigationItem.rightBarButtonItem?
             .publisher
@@ -79,54 +90,59 @@ class IngredientListViewController: UIViewController {
                 self?.presentIngredientForm(for: nil)
             })
             .store(in: &cancellables)
-        
+
+        // Bind ingredients to tableView using diffable data source
         viewModel.ingredients
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ingredients in
-                self?.updateTableView(with: ingredients)
+                self?.updateDataSource(with: ingredients)
             }
             .store(in: &cancellables)
 
-//        tableView.publisher(for: \.didDeleteRowAt)
+        // Bind tableView item deletions to modelDeletedSubject
+//        tableView.didDeleteRowAtPublisher()
 //            .compactMap { [weak self] indexPath -> Ingredient? in
-//                guard let self = self,
-//                      let dataSource = self.viewModel.ingredients.value as? [Ingredient] else { return nil }
+//                guard let self = self else { return nil }
+//                let dataSource = self.viewModel.ingredients.value
 //                return dataSource[indexPath.row]
 //            }
 //            .sink { [weak self] ingredient in
 //                self?.modelDeletedSubject.send(ingredient)
 //            }
 //            .store(in: &cancellables)
-//
-//        // Handle modelDeletedSubject to delete an ingredient
-//        modelDeletedSubject
-//            .sink { [weak self] ingredient in
-//                self?.viewModel.delete(ingredient)
-//            }
-//            .store(in: &cancellables)
-//
-//        // Bind table view row selections to modelSelectedSubject
-//        tableView.publisher(for: \\.didSelectRowAt)
+
+        // Handle modelDeletedSubject
+        modelDeletedSubject
+            .sink { [weak self] ingredient in
+                self?.viewModel.delete(ingredient)
+            }
+            .store(in: &cancellables)
+
+        // Bind tableView item selections to modelSelectedSubject
+//        tableView.didSelectRowAtPublisher()
 //            .compactMap { [weak self] indexPath -> Ingredient? in
-//                guard let self = self,
-//                      let dataSource = self.viewModel.ingredients.value as? [Ingredient] else { return nil }
+//                guard let self = self else { return nil }
+//                let dataSource = self.viewModel.ingredients.value
 //                return dataSource[indexPath.row]
 //            }
 //            .sink { [weak self] ingredient in
 //                self?.modelSelectedSubject.send(ingredient)
 //            }
 //            .store(in: &cancellables)
-//
-//        // Handle modelSelectedSubject to present the ingredient form
-//        modelSelectedSubject
-//            .sink { [weak self] ingredient in
-//                self?.presentIngredientForm(for: ingredient)
-//            }
-//            .store(in: &cancellables)
+
+        // Handle modelSelectedSubject
+        modelSelectedSubject
+            .sink { [weak self] ingredient in
+                self?.presentIngredientForm(for: ingredient)
+            }
+            .store(in: &cancellables)
     }
 
-    private func updateTableView(with ingredients: [Ingredient]) {
-        tableView.reloadData()
+    private func updateDataSource(with ingredients: [Ingredient]) {
+        var snapshot = NSDiffableDataSourceSnapshot<Int, Ingredient>()
+        snapshot.appendSections([0])
+        snapshot.appendItems(ingredients)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
 
     private func presentIngredientForm(for ingredient: Ingredient?) {
