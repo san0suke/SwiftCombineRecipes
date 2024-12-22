@@ -17,7 +17,7 @@ class IngredientListCoordinator: IngredientListCoordinatorProtocol {
     weak var navigationController: UINavigationControllerProtocol?
     
     func presentIngredientForm(for ingredient: Ingredient?, completion: @escaping () -> Void) {
-//        let viewController = IngredientFormViewController(completion: completion, ingredient: ingredient)
-//        navigationController?.presentMediumModal(viewController)
+        let viewController = IngredientFormViewController(completion: completion, ingredient: ingredient)
+        navigationController?.presentMediumModal(viewController)
     }
 }
