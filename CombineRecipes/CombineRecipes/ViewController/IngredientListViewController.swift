@@ -113,6 +113,13 @@ class IngredientListViewController: UIViewController {
 
     private func presentIngredientForm(for ingredient: Ingredient?) {
         coordinator.presentIngredientForm(for: ingredient) { [weak self] in
+            if let ingredient = ingredient {
+                var snapshot = self?.dataSource.snapshot()
+                snapshot?.reloadItems([ingredient])
+                if let snapshot = snapshot {
+                    self?.dataSource.apply(snapshot, animatingDifferences: true)
+                }
+            }
             self?.viewModel.fetch()
         }
     }
