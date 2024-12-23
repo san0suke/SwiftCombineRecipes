@@ -6,16 +6,15 @@
 //
 
 import UIKit
-//import RxSwift
-//import RxCocoa
+import Combine
 
 class IngredientFormViewController: UIViewController {
     
     private let viewModel: IngredientFormViewModelProtocol
     private let completion: () -> Void
-//    private let disposeBag = DisposeBag()
+    private var cancellables = Set<AnyCancellable>()
 
-    private(set) var textField: UITextField = {
+    private(set) var nameTextField: UITextField = {
         let textField = UITextField()
         textField.borderStyle = .roundedRect
         textField.placeholder = "Ingredient name"
@@ -32,7 +31,6 @@ class IngredientFormViewController: UIViewController {
          viewModel: IngredientFormViewModelProtocol = IngredientFormViewModel()) {
         self.completion = completion
         self.viewModel = viewModel
-//        self.viewModel.ingredientRelay.accept(ingredient)
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -52,41 +50,51 @@ class IngredientFormViewController: UIViewController {
     }
     
     private func setupUI() {
-        view.addSubview(textField)
+        view.addSubview(nameTextField)
         navigationItem.rightBarButtonItem = saveButton
         navigationItem.leftBarButtonItem = cancelButton
         
         NSLayoutConstraint.activate([
-            textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            textField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            textField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+            nameTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            nameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            nameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
     }
     
     private func bindViewModel() {
-//        viewModel.ingredientName
-//            .bind(to: textField.rx.text)
-//            .disposed(by: disposeBag)
-//        
-//        textField.rx.text.orEmpty
-//            .bind(to: viewModel.ingredientName)
-//            .disposed(by: disposeBag)
-//        
-//        saveButton.rx.tap
-//            .subscribe(onNext: { [weak self] in
+        viewModel.viewState.$ingredientName
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] name in
+                self?.nameTextField.text = name
+            }
+            .store(in: &cancellables)
+        
+        nameTextField.publisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] text in
+                print(text)
+                self?.viewModel.viewState.ingredientName = text
+            }
+            .store(in: &cancellables)
+        
+        // Bind save button tap
+//        saveButton.tapPublisher
+//            .sink { [weak self] in
 //                self?.didTapSaveButton()
-//            })
-//            .disposed(by: disposeBag)
+//            }
+//            .store(in: &cancellables)
 //        
-//        cancelButton.rx.tap
-//            .subscribe(onNext: { [weak self] in
+//        // Bind cancel button tap
+//        cancelButton.tapPublisher
+//            .sink { [weak self] in
 //                self?.didTapCancelButton()
-//            })
-//            .disposed(by: disposeBag)
-//        
+//            }
+//            .store(in: &cancellables)
+        
+        // Enable/disable save button
 //        viewModel.isSaveButtonEnabled
-//            .bind(to: saveButton.rx.isEnabled)
-//            .disposed(by: disposeBag)
+//            .assign(to: \UIBarButtonItem.isEnabled, on: saveButton)
+//            .store(in: &cancellables)
     }
 
     // MARK: - Actions
@@ -102,3 +110,11 @@ class IngredientFormViewController: UIViewController {
     }
 }
 
+// MARK: - Extensions for Combine Publishers
+//extension UITextField {
+//    var textPublisher: AnyPublisher<String?, Never> {
+//        NotificationCenter.default.publisher(for: UITextField.textDidChangeNotification, object: self)
+//            .compactMap { ($0.object as? UITextField)?.text }
+//            .eraseToAnyPublisher()
+//    }
+//}

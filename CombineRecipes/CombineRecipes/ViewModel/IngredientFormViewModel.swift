@@ -6,19 +6,23 @@
 //
 
 import Foundation
-//import RxSwift
-//import RxCocoa
+import Combine
 
 protocol IngredientFormViewModelProtocol: AnyObject {
-//    var isSaveButtonEnabled: Observable<Bool> { get }
-//    var ingredientName: BehaviorRelay<String> { get }
+    var viewState: IngredientFormViewModel.ViewState { get }
     var isEditing: Bool { get }
-//    var ingredientRelay: BehaviorRelay<RecipeIngredient?> { get }
     
     func save() -> Bool
 }
 
 class IngredientFormViewModel: IngredientFormViewModelProtocol {
+    
+    class ViewState {
+        @Published var isSaveButtonEnabled: Bool = false
+        @Published var ingredientName: String = ""
+    }
+    
+    var viewState = ViewState()
     
 //    private let ingredientDAO: RecipeIngredientDAOProtocol
 //    private let disposeBag = DisposeBag()
@@ -29,10 +33,7 @@ class IngredientFormViewModel: IngredientFormViewModelProtocol {
 //            .distinctUntilChanged()
 //    }()
 //    
-//    // MARK: - Inputs
-//    let ingredientName = BehaviorRelay<String>(value: "")
-//    let ingredientRelay = BehaviorRelay<RecipeIngredient?>(value: nil)
-//    
+
     // MARK: - Outputs
     private(set) var isEditing: Bool = false
 //    
