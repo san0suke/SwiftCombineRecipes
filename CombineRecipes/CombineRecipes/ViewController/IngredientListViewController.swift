@@ -66,6 +66,9 @@ class IngredientListViewController: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
 
         view.addSubview(tableView)
+        
+        navigationItem.rightBarButtonItem?.target = self
+        navigationItem.rightBarButtonItem?.action = #selector(addButtonTapped)
 
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -84,13 +87,6 @@ class IngredientListViewController: UIViewController {
     }
 
     private func setupBindings() {
-        navigationItem.rightBarButtonItem?
-            .publisher
-            .sink(receiveValue: { [weak self] _ in
-                self?.presentIngredientForm(for: nil)
-            })
-            .store(in: &cancellables)
-
         // Bind ingredients to tableView using diffable data source
         viewModel.ingredients
             .receive(on: DispatchQueue.main)
@@ -136,6 +132,10 @@ class IngredientListViewController: UIViewController {
                 self?.presentIngredientForm(for: ingredient)
             }
             .store(in: &cancellables)
+    }
+    
+    @objc private func addButtonTapped() {
+        presentIngredientForm(for: nil)
     }
 
     private func updateDataSource(with ingredients: [Ingredient]) {

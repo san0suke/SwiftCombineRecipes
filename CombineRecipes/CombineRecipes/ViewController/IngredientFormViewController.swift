@@ -54,6 +54,14 @@ class IngredientFormViewController: UIViewController {
         navigationItem.rightBarButtonItem = saveButton
         navigationItem.leftBarButtonItem = cancelButton
         
+        nameTextField.addTarget(self, action: #selector(nameTextFieldDidChange(_:)), for: .editingChanged)
+        
+        saveButton.target = self
+        saveButton.action = #selector(didTapSaveButton)
+        
+        cancelButton.target = self
+        cancelButton.action = #selector(didTapCancelButton)
+        
         NSLayoutConstraint.activate([
             nameTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             nameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -66,14 +74,6 @@ class IngredientFormViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] name in
                 self?.nameTextField.text = name
-            }
-            .store(in: &cancellables)
-        
-        nameTextField.publisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] text in
-                print(text)
-                self?.viewModel.viewState.ingredientName = text
             }
             .store(in: &cancellables)
         
@@ -96,25 +96,20 @@ class IngredientFormViewController: UIViewController {
 //            .assign(to: \UIBarButtonItem.isEnabled, on: saveButton)
 //            .store(in: &cancellables)
     }
+    
+    @objc private func nameTextFieldDidChange(_ textField: UITextField) {
+        viewModel.viewState.ingredientName = textField.text ?? ""
+    }
 
     // MARK: - Actions
-    private func didTapSaveButton() {
+    @objc private func didTapSaveButton() {
         if viewModel.save() {
             completion()
             dismiss(animated: true, completion: nil)
         }
     }
 
-    private func didTapCancelButton() {
+    @objc private func didTapCancelButton() {
         dismiss(animated: true, completion: nil)
     }
 }
-
-// MARK: - Extensions for Combine Publishers
-//extension UITextField {
-//    var textPublisher: AnyPublisher<String?, Never> {
-//        NotificationCenter.default.publisher(for: UITextField.textDidChangeNotification, object: self)
-//            .compactMap { ($0.object as? UITextField)?.text }
-//            .eraseToAnyPublisher()
-//    }
-//}

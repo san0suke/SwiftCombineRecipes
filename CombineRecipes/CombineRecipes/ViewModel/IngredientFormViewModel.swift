@@ -24,7 +24,8 @@ class IngredientFormViewModel: IngredientFormViewModelProtocol {
     
     var viewState = ViewState()
     
-//    private let ingredientDAO: RecipeIngredientDAOProtocol
+    private let ingredientDAO: IngredientDAOProtocol
+    private let ingredient: Ingredient? = nil
 //    private let disposeBag = DisposeBag()
 //    
 //    private(set) lazy var isSaveButtonEnabled: Observable<Bool> = {
@@ -36,11 +37,11 @@ class IngredientFormViewModel: IngredientFormViewModelProtocol {
 
     // MARK: - Outputs
     private(set) var isEditing: Bool = false
-//    
-//    // MARK: - Initialization
-//    init(ingredientDAO: RecipeIngredientDAOProtocol = RecipeIngredientDAO()) {
-//        self.ingredientDAO = ingredientDAO
-//        
+    
+    // MARK: - Initialization
+    init(ingredientDAO: IngredientDAOProtocol = IngredientDAO()) {
+        self.ingredientDAO = ingredientDAO
+        
 //        ingredientRelay
 //            .subscribe { [weak self] ingredient in
 //                guard let self = self else { return }
@@ -52,14 +53,13 @@ class IngredientFormViewModel: IngredientFormViewModelProtocol {
 //                }
 //            }
 //            .disposed(by: disposeBag)
-//    }
-//    
+    }
+    
     // MARK: - Create or Update Ingredient
     func save() -> Bool {
-//        let ingredientToReturn = ingredientRelay.value ?? ingredientDAO.createInstance()
-//        ingredientToReturn.name = ingredientName.value
-//        
-//        return ingredientDAO.saveContext()
-        return false
+        let ingredient = ingredient ?? ingredientDAO.createInstance()
+        ingredient.name = viewState.ingredientName
+        
+        return ingredientDAO.saveContext()
     }
 }
