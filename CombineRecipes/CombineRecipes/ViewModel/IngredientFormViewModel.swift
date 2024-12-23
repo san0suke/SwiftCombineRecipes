@@ -11,6 +11,7 @@ import Combine
 protocol IngredientFormViewModelProtocol: AnyObject {
     var viewState: IngredientFormViewModel.ViewState { get }
     var isEditing: Bool { get }
+    var ingredientSubject: CurrentValueSubject<Ingredient?, Never> { get }
     
     func save() -> Bool
 }
@@ -22,12 +23,12 @@ class IngredientFormViewModel: IngredientFormViewModelProtocol {
         @Published var ingredientName: String = ""
     }
     
-    var viewState = ViewState()
+    private(set) var viewState = ViewState()
     
     private let ingredientDAO: IngredientDAOProtocol
-    private let ingredient: Ingredient? = nil
-//    private let disposeBag = DisposeBag()
-//    
+    private(set) var ingredientSubject = CurrentValueSubject<Ingredient?, Never>(nil)
+    private var cancellables = Set<AnyCancellable>()
+    
 //    private(set) lazy var isSaveButtonEnabled: Observable<Bool> = {
 //        return ingredientName
 //            .map { !$0.isEmpty }
@@ -42,22 +43,22 @@ class IngredientFormViewModel: IngredientFormViewModelProtocol {
     init(ingredientDAO: IngredientDAOProtocol = IngredientDAO()) {
         self.ingredientDAO = ingredientDAO
         
-//        ingredientRelay
-//            .subscribe { [weak self] ingredient in
-//                guard let self = self else { return }
-//                
-//                self.isEditing = ingredient != nil
-//                
-//                if let existingIngredient = ingredient {
-//                    self.ingredientName.accept(existingIngredient.name ?? "")
-//                }
-//            }
-//            .disposed(by: disposeBag)
+        ingredientSubject
+            .sink { [weak self] ingredient in
+                guard let self = self else { return }
+                
+                self.isEditing = ingredient != nil
+                
+                if let existingIngredient = ingredient {
+                    self.viewState.ingredientName = existingIngredient.name ?? ""
+                }
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - Create or Update Ingredient
     func save() -> Bool {
-        let ingredient = ingredient ?? ingredientDAO.createInstance()
+        let ingredient = ingredientSubject.value ?? ingredientDAO.createInstance()
         ingredient.name = viewState.ingredientName
         
         return ingredientDAO.saveContext()

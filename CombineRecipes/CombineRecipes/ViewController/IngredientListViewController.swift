@@ -17,8 +17,8 @@ class IngredientListViewController: UIViewController {
     private var dataSource: UITableViewDiffableDataSource<Int, Ingredient>!
 
     private var addButtonTappedSubject = PassthroughSubject<Void, Never>()
-    private var modelDeletedSubject = PassthroughSubject<Ingredient, Never>()
-    private var modelSelectedSubject = PassthroughSubject<Ingredient, Never>()
+//    private var modelDeletedSubject = PassthroughSubject<Ingredient, Never>()
+//    private var modelSelectedSubject = PassthroughSubject<Ingredient, Never>()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -42,6 +42,7 @@ class IngredientListViewController: UIViewController {
         setupUI()
         setupDataSource()
         setupBindings()
+        setupTableViewDelegates()
         viewModel.fetch()
     }
 
@@ -87,53 +88,18 @@ class IngredientListViewController: UIViewController {
     }
 
     private func setupBindings() {
-        // Bind ingredients to tableView using diffable data source
         viewModel.ingredients
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ingredients in
                 self?.updateDataSource(with: ingredients)
             }
             .store(in: &cancellables)
-
-        // Bind tableView item deletions to modelDeletedSubject
-//        tableView.didDeleteRowAtPublisher()
-//            .compactMap { [weak self] indexPath -> Ingredient? in
-//                guard let self = self else { return nil }
-//                let dataSource = self.viewModel.ingredients.value
-//                return dataSource[indexPath.row]
-//            }
-//            .sink { [weak self] ingredient in
-//                self?.modelDeletedSubject.send(ingredient)
-//            }
-//            .store(in: &cancellables)
-
-        // Handle modelDeletedSubject
-        modelDeletedSubject
-            .sink { [weak self] ingredient in
-                self?.viewModel.delete(ingredient)
-            }
-            .store(in: &cancellables)
-
-        // Bind tableView item selections to modelSelectedSubject
-//        tableView.didSelectRowAtPublisher()
-//            .compactMap { [weak self] indexPath -> Ingredient? in
-//                guard let self = self else { return nil }
-//                let dataSource = self.viewModel.ingredients.value
-//                return dataSource[indexPath.row]
-//            }
-//            .sink { [weak self] ingredient in
-//                self?.modelSelectedSubject.send(ingredient)
-//            }
-//            .store(in: &cancellables)
-
-        // Handle modelSelectedSubject
-        modelSelectedSubject
-            .sink { [weak self] ingredient in
-                self?.presentIngredientForm(for: ingredient)
-            }
-            .store(in: &cancellables)
     }
-    
+
+    private func setupTableViewDelegates() {
+        tableView.delegate = self
+    }
+
     @objc private func addButtonTapped() {
         presentIngredientForm(for: nil)
     }
@@ -149,5 +115,29 @@ class IngredientListViewController: UIViewController {
         coordinator.presentIngredientForm(for: ingredient) { [weak self] in
             self?.viewModel.fetch()
         }
+    }
+}
+
+extension IngredientListViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let ingredient = dataSource.itemIdentifier(for: indexPath) else { return }
+        presentIngredientForm(for: ingredient)
+    }
+
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        guard let ingredient = dataSource.itemIdentifier(for: indexPath) else { return nil }
+        
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completionHandler in
+            self?.viewModel.delete(ingredient)
+            
+            var snapshot = self?.dataSource.snapshot()
+            snapshot?.deleteItems([ingredient])
+            if let snapshot = snapshot {
+                self?.dataSource.apply(snapshot, animatingDifferences: true)
+            }
+            completionHandler(true)
+        }
+        
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
 }

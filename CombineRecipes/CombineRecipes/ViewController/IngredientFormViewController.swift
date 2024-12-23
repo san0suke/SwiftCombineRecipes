@@ -31,6 +31,7 @@ class IngredientFormViewController: UIViewController {
          viewModel: IngredientFormViewModelProtocol = IngredientFormViewModel()) {
         self.completion = completion
         self.viewModel = viewModel
+        self.viewModel.ingredientSubject.send(ingredient)
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -76,20 +77,6 @@ class IngredientFormViewController: UIViewController {
                 self?.nameTextField.text = name
             }
             .store(in: &cancellables)
-        
-        // Bind save button tap
-//        saveButton.tapPublisher
-//            .sink { [weak self] in
-//                self?.didTapSaveButton()
-//            }
-//            .store(in: &cancellables)
-//        
-//        // Bind cancel button tap
-//        cancelButton.tapPublisher
-//            .sink { [weak self] in
-//                self?.didTapCancelButton()
-//            }
-//            .store(in: &cancellables)
         
         // Enable/disable save button
 //        viewModel.isSaveButtonEnabled
