@@ -41,4 +41,26 @@ class IngredientFormViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.viewState.isSaveButtonEnabled)
         XCTAssertEqual(viewModel.viewState.ingredientName, "Bacon")
     }
+    
+    func testSaveWithNewIngredientShouldCreateInstance() {
+        var saveCalled = false
+        var createInstanceCalled = false
+        let ingredient = Ingredient(context: self.mockContext)
+        
+        mockDAO.saveContextCompletion = {
+            saveCalled = true
+            return true
+        }
+        mockDAO.createInstanceCompletion = {
+            createInstanceCalled = true
+            return ingredient
+        }
+        
+        viewModel.viewState.ingredientName = "Bacon"
+        
+        XCTAssertTrue(viewModel.save())
+        XCTAssertTrue(saveCalled)
+        XCTAssertTrue(createInstanceCalled)
+        XCTAssertEqual(ingredient.name, "Bacon")
+    }
 }
