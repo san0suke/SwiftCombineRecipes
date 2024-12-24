@@ -87,6 +87,43 @@ class IngredientFormViewControllerTests: XCTestCase {
         XCTAssertEqual(mockViewModel.viewState.ingredientName, "Bacon")
     }
     
+    func testIsSaveButtonEnabledShouldEnableSaveButton() {
+        let enabledExpectation = expectation(description: "Save button enabled")
+        
+        mockViewModel.viewState.$isSaveButtonEnabled
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { isEnabled in
+                enabledExpectation.fulfill()
+            }
+            .store(in: &cancellables)
+        
+        let viewController = createViewController {}
+        
+        mockViewModel.viewState.isSaveButtonEnabled = true
+        
+        waitForExpectations(timeout: 3)
+        
+        XCTAssertTrue(viewController.saveButton.isEnabled)
+    }
+    
+    func testIsSaveButtonDisabledShouldDisableSaveButton() {
+        let enabledExpectation = expectation(description: "Save button enabled")
+        
+        mockViewModel.viewState.$isSaveButtonEnabled
+            .receive(on: DispatchQueue.main)
+            .sink { isEnabled in
+                enabledExpectation.fulfill()
+            }
+            .store(in: &cancellables)
+        
+        let viewController = createViewController {}
+        
+        waitForExpectations(timeout: 3)
+        
+        XCTAssertFalse(viewController.saveButton.isEnabled)
+    }
+    
     private func createViewController(completion: @escaping () -> Void, ingredient: Ingredient? = nil) -> IngredientFormViewController {
         let viewController = IngredientFormViewController(completion: completion, ingredient: ingredient, viewModel: mockViewModel)
         
