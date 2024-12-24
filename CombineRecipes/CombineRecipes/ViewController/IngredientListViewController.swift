@@ -17,8 +17,6 @@ class IngredientListViewController: UIViewController {
     private var dataSource: UITableViewDiffableDataSource<Int, Ingredient>!
 
     private var addButtonTappedSubject = PassthroughSubject<Void, Never>()
-//    private var modelDeletedSubject = PassthroughSubject<Ingredient, Never>()
-//    private var modelSelectedSubject = PassthroughSubject<Ingredient, Never>()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -114,11 +112,7 @@ class IngredientListViewController: UIViewController {
     private func presentIngredientForm(for ingredient: Ingredient?) {
         coordinator.presentIngredientForm(for: ingredient) { [weak self] in
             if let ingredient = ingredient {
-                var snapshot = self?.dataSource.snapshot()
-                snapshot?.reloadItems([ingredient])
-                if let snapshot = snapshot {
-                    self?.dataSource.apply(snapshot, animatingDifferences: true)
-                }
+                self?.dataSource.refreshItem(ingredient)
             }
             self?.viewModel.fetch()
         }
@@ -136,12 +130,8 @@ extension IngredientListViewController: UITableViewDelegate {
         
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completionHandler in
             self?.viewModel.delete(ingredient)
+            self?.dataSource.deleteItem(ingredient)
             
-            var snapshot = self?.dataSource.snapshot()
-            snapshot?.deleteItems([ingredient])
-            if let snapshot = snapshot {
-                self?.dataSource.apply(snapshot, animatingDifferences: true)
-            }
             completionHandler(true)
         }
         
