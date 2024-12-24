@@ -24,6 +24,7 @@ class IngredientFormViewModelTests: XCTestCase {
     }
     
     override func tearDown() {
+        mockContext = nil
         viewModel = nil
         mockDAO = nil
         super.tearDown()
