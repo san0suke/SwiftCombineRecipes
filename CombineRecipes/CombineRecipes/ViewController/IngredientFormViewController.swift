@@ -78,10 +78,12 @@ class IngredientFormViewController: UIViewController {
             }
             .store(in: &cancellables)
         
-        // Enable/disable save button
-//        viewModel.isSaveButtonEnabled
-//            .assign(to: \UIBarButtonItem.isEnabled, on: saveButton)
-//            .store(in: &cancellables)
+        viewModel.viewState.$isSaveButtonEnabled
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] enabled in
+                self?.saveButton.isEnabled = enabled
+            }
+            .store(in: &cancellables)
     }
     
     @objc private func nameTextFieldDidChange(_ textField: UITextField) {

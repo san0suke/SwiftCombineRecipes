@@ -28,13 +28,6 @@ class IngredientFormViewModel: IngredientFormViewModelProtocol {
     private let ingredientDAO: IngredientDAOProtocol
     private(set) var ingredientSubject = CurrentValueSubject<Ingredient?, Never>(nil)
     private var cancellables = Set<AnyCancellable>()
-    
-//    private(set) lazy var isSaveButtonEnabled: Observable<Bool> = {
-//        return ingredientName
-//            .map { !$0.isEmpty }
-//            .distinctUntilChanged()
-//    }()
-//    
 
     // MARK: - Outputs
     private(set) var isEditing: Bool = false
@@ -54,6 +47,11 @@ class IngredientFormViewModel: IngredientFormViewModelProtocol {
                 }
             }
             .store(in: &cancellables)
+        
+        viewState.$ingredientName
+            .map { !$0.isEmpty }
+            .removeDuplicates()
+            .assign(to: &viewState.$isSaveButtonEnabled)
     }
     
     // MARK: - Create or Update Ingredient
