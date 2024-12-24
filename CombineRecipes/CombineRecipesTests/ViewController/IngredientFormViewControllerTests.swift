@@ -76,6 +76,17 @@ class IngredientFormViewControllerTests: XCTestCase {
         XCTAssertTrue(ingredientSubjectCalled)
     }
     
+    func testChangeNameTextFieldShouldSetIngredientName() {
+        let viewController = createViewController {}
+        
+        XCTAssertEqual(mockViewModel.viewState.ingredientName, "")
+        
+        viewController.nameTextField.text = "Bacon"
+        viewController.nameTextField.sendActions(for: .editingChanged)
+        
+        XCTAssertEqual(mockViewModel.viewState.ingredientName, "Bacon")
+    }
+    
     private func createViewController(completion: @escaping () -> Void, ingredient: Ingredient? = nil) -> IngredientFormViewController {
         let viewController = IngredientFormViewController(completion: completion, ingredient: ingredient, viewModel: mockViewModel)
         
