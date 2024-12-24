@@ -36,6 +36,8 @@ class IngredientFormViewControllerTests: XCTestCase {
         var callbackCalled = false
         var ingredientSubjectCalled = false
         
+        mockViewModel.isEditing = true
+        
         mockViewModel.ingredientSubject
             .dropFirst()
             .sink { receivedIngredient in
@@ -45,10 +47,11 @@ class IngredientFormViewControllerTests: XCTestCase {
         }
         .store(in: &cancellables)
         
-        _ = createViewController(completion: {
+        let viewController = createViewController(completion: {
             callbackCalled = true
         }, ingredient: ingredient)
         
+        XCTAssertEqual(viewController.title, "Edit Ingredient")
         XCTAssertFalse(callbackCalled)
         XCTAssertTrue(ingredientSubjectCalled)
     }
@@ -64,10 +67,11 @@ class IngredientFormViewControllerTests: XCTestCase {
         }
         .store(in: &cancellables)
         
-        _ = createViewController {
+        let viewController = createViewController {
             callbackCalled = true
         }
         
+        XCTAssertEqual(viewController.title, "Add Ingredient")
         XCTAssertFalse(callbackCalled)
         XCTAssertTrue(ingredientSubjectCalled)
     }
