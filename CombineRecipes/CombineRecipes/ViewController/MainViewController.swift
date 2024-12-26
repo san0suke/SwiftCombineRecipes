@@ -82,7 +82,7 @@ class MainViewController: UIViewController {
     }
     
     @objc private func onTapRecipes() {
-//        navigationController?.pushViewController(RecipeListViewController(), animated: true)
+        navigationController?.pushViewController(RecipeListViewController(), animated: true)
     }
     
     private static func createMainButtonConfig(title: String, icon: String) -> UIButton.Configuration {

@@ -1,5 +1,5 @@
 //
-//  IngredientsListViewModel.swift
+//  IngredientListViewModel.swift
 //  CombineRecipes
 //
 //  Created by Robson Cesar de Siqueira on 22/12/24.
@@ -8,13 +8,13 @@
 import CoreData
 import Combine
 
-protocol IngredientsListViewModelProtocol {
+protocol IngredientListViewModelProtocol {
     var ingredients: CurrentValueSubject<[Ingredient], Never> { get }
     func fetch()
     func delete(_ ingredient: Ingredient)
 }
 
-class IngredientsListViewModel: IngredientsListViewModelProtocol {
+class IngredientListViewModel: IngredientListViewModelProtocol {
 
     private let ingredientDAO: IngredientDAOProtocol
 

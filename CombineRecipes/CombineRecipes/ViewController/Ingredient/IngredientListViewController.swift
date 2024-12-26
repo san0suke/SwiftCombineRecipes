@@ -12,16 +12,13 @@ class IngredientListViewController: UIViewController {
 
     private var coordinator: IngredientListCoordinatorProtocol
     private let tableView: UITableView
-    private let viewModel: IngredientsListViewModelProtocol
+    private let viewModel: IngredientListViewModelProtocol
 
-    private var dataSource: UITableViewDiffableDataSource<Int, Ingredient>!
-
-    private var addButtonTappedSubject = PassthroughSubject<Void, Never>()
-
+    private var dataSource: UITableViewDiffableDataSource<Int, Ingredient>?
     private var cancellables = Set<AnyCancellable>()
 
     init(tableView: UITableView = UITableView(frame: .zero, style: .insetGrouped),
-         viewModel: IngredientsListViewModelProtocol = IngredientsListViewModel(),
+         viewModel: IngredientListViewModelProtocol = IngredientListViewModel(),
          coordinator: IngredientListCoordinatorProtocol = IngredientListCoordinator()) {
         self.tableView = tableView
         self.viewModel = viewModel
@@ -106,13 +103,13 @@ class IngredientListViewController: UIViewController {
         var snapshot = NSDiffableDataSourceSnapshot<Int, Ingredient>()
         snapshot.appendSections([0])
         snapshot.appendItems(ingredients)
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource?.apply(snapshot, animatingDifferences: true)
     }
 
     private func presentIngredientForm(for ingredient: Ingredient?) {
         coordinator.presentIngredientForm(for: ingredient) { [weak self] in
             if let ingredient = ingredient {
-                self?.dataSource.refreshItem(ingredient)
+                self?.dataSource?.refreshItem(ingredient)
             }
             self?.viewModel.fetch()
         }
@@ -121,16 +118,16 @@ class IngredientListViewController: UIViewController {
 
 extension IngredientListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let ingredient = dataSource.itemIdentifier(for: indexPath) else { return }
+        guard let ingredient = dataSource?.itemIdentifier(for: indexPath) else { return }
         presentIngredientForm(for: ingredient)
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        guard let ingredient = dataSource.itemIdentifier(for: indexPath) else { return nil }
+        guard let ingredient = dataSource?.itemIdentifier(for: indexPath) else { return nil }
         
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completionHandler in
             self?.viewModel.delete(ingredient)
-            self?.dataSource.deleteItem(ingredient)
+            self?.dataSource?.deleteItem(ingredient)
             
             completionHandler(true)
         }
