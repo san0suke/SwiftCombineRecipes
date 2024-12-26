@@ -75,12 +75,14 @@ class RecipeFormViewController: UIViewController {
     private let completion: () -> Void
     
     private let cancellables = Set<AnyCancellable>()
-//    private let viewModel: RecipeFormViewModel
+    private let viewModel: RecipeFormViewModel
     
     // MARK: - Initialization
     init(completion: @escaping () -> Void, recipe: Recipe? = nil) {
         self.completion = completion
-//        self.viewModel = RecipeFormViewModel(recipe: recipe)
+        self.viewModel = RecipeFormViewModel()
+        self.viewModel.recipeSubject.send(recipe)
+        
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -93,7 +95,7 @@ class RecipeFormViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        title = "Add Recipe"
+        title = viewModel.isEditing ? "Edit Recipe" : "Add Recipe"
         
         setupUI()
         setupNavigationBar()
@@ -152,46 +154,6 @@ class RecipeFormViewController: UIViewController {
         navigationItem.rightBarButtonItem = saveButton
     }
     
-//    private func bindViews() {
-//        saveButton.rx.tap
-//            .subscribe(onNext: { [weak self] in
-//                self?.didTapSaveButton()
-//            })
-//            .disposed(by: disposeBag)
-//        
-//        viewModel.recipeName
-//            .bind(to: nameTextField.rx.text)
-//            .disposed(by: disposeBag)
-//        
-//        nameTextField.rx.text.orEmpty
-//            .bind(to: viewModel.recipeName)
-//            .disposed(by: disposeBag)
-//        
-//        viewModel.selectedIngredientsRelay
-//            .bind(to: ingredientsTableView.rx.items(cellIdentifier: "IngredientCell")) { _, ingredient, cell in
-//                cell.textLabel?.text = ingredient.name ?? "Unnamed Ingredient"
-//            }
-//            .disposed(by: disposeBag)
-//        
-//        viewModel.isSaveButtonEnabled
-//            .bind(to: saveButton.rx.isEnabled)
-//            .disposed(by: disposeBag)
-//        
-//        ingredientsTableView.rx.modelDeleted(RecipeIngredient.self)
-//            .subscribe { [weak self] ingredient in
-//                self?.viewModel.delete(ingredient)
-//            }
-//            .disposed(by: disposeBag)
-//        
-//        ingredientsTableView.rx
-//            .modelSelected(RecipeIngredient.self)
-//            .subscribe { [weak self] _ in
-//                self?.openSelectIngredientModal()
-//            }
-//            .disposed(by: disposeBag)
-//
-//    }
-//    
 //    // MARK: - Actions
 //    
 //    @objc private func onSelectIngredientTap() {
