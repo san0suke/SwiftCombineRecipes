@@ -17,7 +17,10 @@ class RecipeListCoordinator: RecipeListCoordinatorProtocol {
     weak var navigationController: UINavigationControllerProtocol?
     
     func presentRecipeForm(for recipe: Recipe?, completion: @escaping () -> Void) {
-//        let viewController = RecipeFormViewController(completion: completion, ingredient: ingredient)
-//        navigationController?.presentMediumModal(viewController)
+        let viewController = RecipeFormViewController (completion: { [weak self] in
+//            self?.fetch()
+        }, recipe: recipe)
+        
+        navigationController?.pushViewController(viewController, animated: true)
     }
 }
