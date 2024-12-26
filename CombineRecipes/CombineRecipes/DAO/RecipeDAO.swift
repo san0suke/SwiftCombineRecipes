@@ -7,7 +7,7 @@
 
 import CoreData
 
-protocol RecipeDAOProtocol {
+protocol RecipeDAOProtocol: BaseDAOProtocol {
     func createInstance() -> Recipe
     func fetchAll() -> [Recipe]
 }
