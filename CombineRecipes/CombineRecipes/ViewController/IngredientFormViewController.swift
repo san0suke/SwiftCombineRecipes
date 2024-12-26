@@ -25,6 +25,8 @@ class IngredientFormViewController: UIViewController {
     private(set) var saveButton: UIBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: nil, action: nil)
     private(set) var cancelButton: UIBarButtonItem = UIBarButtonItem(title: "Cancel", style: .done, target: nil, action: nil)
     
+    var onDismiss: (() -> Void)?
+    
     // MARK: - Initialization
     init(completion: @escaping () -> Void,
          ingredient: Ingredient? = nil,
@@ -45,6 +47,10 @@ class IngredientFormViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         title = viewModel.isEditing ? "Edit Ingredient" : "Add Ingredient"
+        
+        onDismiss = { [weak self] in
+            self?.dismiss(animated: true)
+        }
         
         setupUI()
         bindViewModel()
@@ -94,11 +100,11 @@ class IngredientFormViewController: UIViewController {
     @objc private func didTapSaveButton() {
         if viewModel.save() {
             completion()
-            dismiss(animated: true, completion: nil)
+            onDismiss?()
         }
     }
 
     @objc private func didTapCancelButton() {
-        dismiss(animated: true, completion: nil)
+        onDismiss?()
     }
 }

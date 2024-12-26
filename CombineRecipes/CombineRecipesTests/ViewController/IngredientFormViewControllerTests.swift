@@ -124,6 +124,90 @@ class IngredientFormViewControllerTests: XCTestCase {
         XCTAssertFalse(viewController.saveButton.isEnabled)
     }
     
+    func testSaveButtonPressedShouldSave() {
+        var saveCalled = false
+        var completionCalled = false
+        var dismissCalled = false
+        
+        mockViewModel.saveCompletion = {
+            saveCalled = true
+            return true
+        }
+        
+        let viewController = createViewController {
+            completionCalled = true
+        }
+        
+        viewController.onDismiss = {
+            dismissCalled = true
+        }
+        
+        _ = viewController.saveButton.target?.perform(
+            viewController.saveButton.action,
+            with: nil
+        )
+
+        XCTAssertTrue(saveCalled)
+        XCTAssertTrue(completionCalled)
+        XCTAssertTrue(dismissCalled)
+    }
+    
+    func testSaveButtonPressedFailedToSaveShouldNotCallCompletionAndDismiss() {
+        var saveCalled = false
+        var completionCalled = false
+        var dismissCalled = false
+        
+        mockViewModel.saveCompletion = {
+            saveCalled = true
+            return false
+        }
+        
+        let viewController = createViewController {
+            completionCalled = true
+        }
+        
+        viewController.onDismiss = {
+            dismissCalled = true
+        }
+        
+        _ = viewController.saveButton.target?.perform(
+            viewController.saveButton.action,
+            with: nil
+        )
+
+        XCTAssertTrue(saveCalled)
+        XCTAssertFalse(completionCalled)
+        XCTAssertFalse(dismissCalled)
+    }
+    
+    func testCancelButtonPressedShouldCallDismiss() {
+        var saveCalled = false
+        var completionCalled = false
+        var dismissCalled = false
+        
+        mockViewModel.saveCompletion = {
+            saveCalled = true
+            return true
+        }
+        
+        let viewController = createViewController {
+            completionCalled = true
+        }
+        
+        viewController.onDismiss = {
+            dismissCalled = true
+        }
+        
+        _ = viewController.cancelButton.target?.perform(
+            viewController.cancelButton.action,
+            with: nil
+        )
+
+        XCTAssertFalse(saveCalled)
+        XCTAssertFalse(completionCalled)
+        XCTAssertTrue(dismissCalled)
+    }
+    
     private func createViewController(completion: @escaping () -> Void, ingredient: Ingredient? = nil) -> IngredientFormViewController {
         let viewController = IngredientFormViewController(completion: completion, ingredient: ingredient, viewModel: mockViewModel)
         
