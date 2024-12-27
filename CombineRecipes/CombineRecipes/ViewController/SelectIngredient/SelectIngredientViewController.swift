@@ -124,8 +124,16 @@ class SelectIngredientViewController: UIViewController {
 
 extension SelectIngredientViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let ingredient = dataSource?.itemIdentifier(for: indexPath) else { return }
-//        presentIngredientForm(for: ingredient)
+        guard let ingredient = dataSource?.itemIdentifier(for: indexPath),
+            let cell = tableView.cellForRow(at: indexPath) else { return }
+
+        if self.viewModel.contains(ingredient) {
+            cell.accessoryType = .none
+        } else {
+            cell.accessoryType = .checkmark
+        }
+        
+        self.viewModel.onRowPressed(ingredient)
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
