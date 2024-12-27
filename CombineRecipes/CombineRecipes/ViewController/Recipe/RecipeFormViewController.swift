@@ -214,16 +214,16 @@ extension RecipeFormViewController: UITableViewDelegate {
         openSelectIngredient()
     }
 
-//    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-//        guard let recipe = dataSource?.itemIdentifier(for: indexPath) else { return nil }
-//        
-//        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completionHandler in
-//            self?.viewModel.delete(recipe)
-//            self?.dataSource?.deleteItem(recipe)
-//            
-//            completionHandler(true)
-//        }
-//        
-//        return UISwipeActionsConfiguration(actions: [deleteAction])
-//    }
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        guard let ingredient = dataSource?.itemIdentifier(for: indexPath) else { return nil }
+        
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completionHandler in
+            self?.viewModel.viewState.selectedIngredients.removeAll(where: { $0 == ingredient })
+            self?.dataSource?.deleteItem(ingredient)
+            
+            completionHandler(true)
+        }
+        
+        return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
 }
