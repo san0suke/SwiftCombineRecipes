@@ -204,6 +204,13 @@ class RecipeFormViewController: UIViewController {
     }
 
     private func setupBindings() {
+        viewModel.viewState.$recipeName
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] name in
+                self?.nameTextField.text = name
+            }
+            .store(in: &cancellables)
+        
         viewModel.viewState.$selectedIngredients
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ingredients in

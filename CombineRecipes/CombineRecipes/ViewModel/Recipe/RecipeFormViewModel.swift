@@ -46,6 +46,7 @@ class RecipeFormViewModel: RecipeFormViewModelProtocol {
                 
                 if let existingRecipe = recipe {
                     self.viewState.recipeName = existingRecipe.name ?? ""
+                    self.updateSelectedIngredients(existingRecipe.ingredients?.allObjects as? [Ingredient] ?? [])
                 }
             }
             .store(in: &cancellables)
