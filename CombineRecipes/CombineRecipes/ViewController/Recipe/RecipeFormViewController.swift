@@ -134,6 +134,11 @@ class RecipeFormViewController: UIViewController {
         ])
         
         selectIngredientsButton.addTarget(self, action: #selector(onSelectIngredientTap), for: .touchUpInside)
+        
+        saveButton.target = self
+        saveButton.action = #selector(didTapSaveButton)
+        
+        nameTextField.addTarget(self, action: #selector(nameTextFieldDidChange(_:)), for: .editingChanged)
     }
 
     private func setupCoordinator() {
@@ -184,6 +189,10 @@ class RecipeFormViewController: UIViewController {
         }
     }
     
+    @objc private func nameTextFieldDidChange(_ textField: UITextField) {
+        viewModel.viewState.recipeName = textField.text ?? ""
+    }
+    
     // MARK: - Table
     
     private func setupDataSource() {
@@ -218,7 +227,7 @@ extension RecipeFormViewController: UITableViewDelegate {
         guard let ingredient = dataSource?.itemIdentifier(for: indexPath) else { return nil }
         
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completionHandler in
-            self?.viewModel.viewState.selectedIngredients.removeAll(where: { $0 == ingredient })
+            self?.viewModel.viewState.selectedIngredients.remove(ingredient)
             self?.dataSource?.deleteItem(ingredient)
             
             completionHandler(true)

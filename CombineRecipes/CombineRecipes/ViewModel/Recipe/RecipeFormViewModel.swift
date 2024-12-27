@@ -64,6 +64,7 @@ class RecipeFormViewModel: RecipeFormViewModelProtocol {
     func save() -> Bool {
         let recipe = recipeSubject.value ?? recipeDAO.createInstance()
         recipe.name = viewState.recipeName
+        recipe.ingredients = NSSet(array: viewState.selectedIngredients)
         
         return recipeDAO.saveContext()
     }
