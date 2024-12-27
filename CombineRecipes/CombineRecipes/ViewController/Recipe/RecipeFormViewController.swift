@@ -75,7 +75,7 @@ class RecipeFormViewController: UIViewController {
     private let completion: () -> Void
     private let cancellables = Set<AnyCancellable>()
     private let viewModel: RecipeFormViewModelProtocol
-    private let coordinator: RecipeFormCoordinatorProtocol
+    private var coordinator: RecipeFormCoordinatorProtocol
     
     // MARK: - Initialization
     init(completion: @escaping () -> Void,
@@ -101,6 +101,7 @@ class RecipeFormViewController: UIViewController {
         title = viewModel.isEditing ? "Edit Recipe" : "Add Recipe"
         
         setupUI()
+        setupCoordinator()
         setupNavigationBar()
         setupTableView()
     }
@@ -131,6 +132,9 @@ class RecipeFormViewController: UIViewController {
         selectIngredientsButton.addTarget(self, action: #selector(onSelectIngredientTap), for: .touchUpInside)
     }
 
+    private func setupCoordinator() {
+        coordinator.navigationController = navigationController
+    }
     
     private func setupNameContainerView() {
         nameContainerView.addSubview(subtitleLabel)
@@ -150,7 +154,7 @@ class RecipeFormViewController: UIViewController {
     }
     
     private func setupTableView() {
-        ingredientsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "IngredientCell")
+        ingredientsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
     }
     
     private func setupNavigationBar() {
@@ -160,14 +164,9 @@ class RecipeFormViewController: UIViewController {
     // MARK: - Actions
     
     @objc private func onSelectIngredientTap() {
-        let viewController = SelectIngredientViewController(selectedIngredients: viewModel.viewState.selectedIngredients) {
-            [weak self] ingredients in
-            guard let self = self else { return }
+        coordinator.presentSelectIngredient(with: viewModel.viewState.selectedIngredients) {
             
-//            viewModel.update(ingredients)
         }
-        
-        navigationController?.presentMediumModal(viewController)
     }
     
     @objc private func didTapSaveButton() {

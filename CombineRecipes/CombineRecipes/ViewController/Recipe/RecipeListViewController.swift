@@ -37,7 +37,7 @@ class RecipeListViewController: UIViewController {
         setupUI()
         setupDataSource()
         setupBindings()
-        setupTableViewDelegates()
+        setupTableViewDelegate()
         viewModel.fetch()
     }
 
@@ -91,7 +91,7 @@ class RecipeListViewController: UIViewController {
             .store(in: &cancellables)
     }
 
-    private func setupTableViewDelegates() {
+    private func setupTableViewDelegate() {
         tableView.delegate = self
     }
 

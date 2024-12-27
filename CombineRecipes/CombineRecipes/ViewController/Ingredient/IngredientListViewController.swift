@@ -37,7 +37,7 @@ class IngredientListViewController: UIViewController {
         setupUI()
         setupDataSource()
         setupBindings()
-        setupTableViewDelegates()
+        setupTableViewDelegate()
         viewModel.fetch()
     }
 
@@ -91,7 +91,7 @@ class IngredientListViewController: UIViewController {
             .store(in: &cancellables)
     }
 
-    private func setupTableViewDelegates() {
+    private func setupTableViewDelegate() {
         tableView.delegate = self
     }
 
