@@ -20,3 +20,12 @@ extension UITableViewDiffableDataSource {
         apply(snapshot, animatingDifferences: true)
     }
 }
+
+extension UITableViewDiffableDataSource where SectionIdentifierType == Int {
+    func updateDataSource(with items: [ItemIdentifierType]) {
+        var snapshot = NSDiffableDataSourceSnapshot<SectionIdentifierType, ItemIdentifierType>()
+        snapshot.appendSections([0])
+        snapshot.appendItems(items)
+        apply(snapshot, animatingDifferences: true)
+    }
+}

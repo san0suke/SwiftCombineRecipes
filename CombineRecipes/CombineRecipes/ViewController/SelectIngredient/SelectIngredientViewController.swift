@@ -69,6 +69,13 @@ class SelectIngredientViewController: UIViewController {
         dataSource = UITableViewDiffableDataSource<Int, Ingredient>(tableView: tableView) { tableView, indexPath, ingredient in
             let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
             cell.textLabel?.text = ingredient.name
+            
+            if self.viewModel.contains(ingredient) {
+                cell.accessoryType = .checkmark
+            } else {
+                cell.accessoryType = .none
+            }
+            
             return cell
         }
     }
@@ -81,34 +88,10 @@ class SelectIngredientViewController: UIViewController {
         viewModel.ingredients
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ingredients in
-                self?.updateDataSource(with: ingredients)
+                self?.dataSource?.updateDataSource(with: ingredients)
             }
             .store(in: &cancellables)
     }
-    
-    private func updateDataSource(with ingredients: [Ingredient]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, Ingredient>()
-        snapshot.appendSections([0])
-        snapshot.appendItems(ingredients)
-        dataSource?.apply(snapshot, animatingDifferences: true)
-    }
-    
-//    private func bindTableView() {
-//        Observable.combineLatest(viewModel.ingredients, viewModel.selectedIngredients)
-//            .map { $0.0 }
-//            .bind(to: tableView.rx.items(cellIdentifier: "Cell")) { [weak self] _, ingredient, cell in
-//                guard let self = self else { return }
-//                
-//                cell.textLabel?.text = ingredient.name
-//                
-//                if self.viewModel.contains(ingredient) {
-//                    cell.accessoryType = .checkmark
-//                } else {
-//                    cell.accessoryType = .none
-//                }
-//            }
-//            .disposed(by: disposeBag)
-//    }
     
     // MARK: - Actions
     @objc private func didTapDoneButton() {
@@ -124,16 +107,10 @@ class SelectIngredientViewController: UIViewController {
 
 extension SelectIngredientViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let ingredient = dataSource?.itemIdentifier(for: indexPath),
-            let cell = tableView.cellForRow(at: indexPath) else { return }
-
-        if self.viewModel.contains(ingredient) {
-            cell.accessoryType = .none
-        } else {
-            cell.accessoryType = .checkmark
-        }
+        guard let ingredient = dataSource?.itemIdentifier(for: indexPath) else { return }
         
         self.viewModel.onRowPressed(ingredient)
+        self.dataSource?.refreshItem(ingredient)
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {

@@ -9,16 +9,16 @@ import UIKit
 
 protocol RecipeFormCoordinatorProtocol {
     var navigationController: UINavigationControllerProtocol? { get set }
-    func presentSelectIngredient(with ingredients: [Ingredient]?, completion: @escaping () -> Void)
+    func presentSelectIngredient(with ingredients: [Ingredient]?, completion: @escaping ([Ingredient]) -> Void)
 }
 
 class RecipeFormCoordinator: RecipeFormCoordinatorProtocol {
     
     weak var navigationController: UINavigationControllerProtocol?
     
-    func presentSelectIngredient(with ingredients: [Ingredient]?, completion: @escaping () -> Void) {
-        let viewController = SelectIngredientViewController(selectedIngredients: ingredients ?? []) { [weak self] ingredients in
-//            self?.fetch()
+    func presentSelectIngredient(with ingredients: [Ingredient]?, completion: @escaping ([Ingredient]) -> Void) {
+        let viewController = SelectIngredientViewController(selectedIngredients: ingredients ?? []) { ingredients in
+            completion(ingredients)
         }
         
         navigationController?.presentMediumModal(viewController)

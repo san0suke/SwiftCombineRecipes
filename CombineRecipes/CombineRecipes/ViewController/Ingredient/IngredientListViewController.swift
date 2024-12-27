@@ -86,7 +86,7 @@ class IngredientListViewController: UIViewController {
         viewModel.ingredients
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ingredients in
-                self?.updateDataSource(with: ingredients)
+                self?.dataSource?.updateDataSource(with: ingredients)
             }
             .store(in: &cancellables)
     }
@@ -97,13 +97,6 @@ class IngredientListViewController: UIViewController {
 
     @objc private func addButtonTapped() {
         presentIngredientForm(for: nil)
-    }
-
-    private func updateDataSource(with ingredients: [Ingredient]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, Ingredient>()
-        snapshot.appendSections([0])
-        snapshot.appendItems(ingredients)
-        dataSource?.apply(snapshot, animatingDifferences: true)
     }
 
     private func presentIngredientForm(for ingredient: Ingredient?) {

@@ -73,6 +73,10 @@ class RecipeListViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
+    
+    @objc private func addButtonTapped() {
+        presentRecipeForm(for: nil)
+    }
 
     private func setupDataSource() {
         dataSource = UITableViewDiffableDataSource<Int, Recipe>(tableView: tableView) { tableView, indexPath, recipe in
@@ -86,24 +90,13 @@ class RecipeListViewController: UIViewController {
         viewModel.recipes
             .receive(on: DispatchQueue.main)
             .sink { [weak self] recipes in
-                self?.updateDataSource(with: recipes)
+                self?.dataSource?.updateDataSource(with: recipes)
             }
             .store(in: &cancellables)
     }
 
     private func setupTableViewDelegate() {
         tableView.delegate = self
-    }
-
-    @objc private func addButtonTapped() {
-        presentRecipeForm(for: nil)
-    }
-
-    private func updateDataSource(with recipes: [Recipe]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, Recipe>()
-        snapshot.appendSections([0])
-        snapshot.appendItems(recipes)
-        dataSource?.apply(snapshot, animatingDifferences: true)
     }
 
     private func presentRecipeForm(for recipe: Recipe?) {

@@ -62,7 +62,7 @@ class RecipeFormViewController: UIViewController {
         return button
     }()
     
-    private let ingredientsTableView: UITableView = {
+    private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .insetGrouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
@@ -73,9 +73,10 @@ class RecipeFormViewController: UIViewController {
     }()
     
     private let completion: () -> Void
-    private let cancellables = Set<AnyCancellable>()
+    private var cancellables = Set<AnyCancellable>()
     private let viewModel: RecipeFormViewModelProtocol
     private var coordinator: RecipeFormCoordinatorProtocol
+    private var dataSource: UITableViewDiffableDataSource<Int, Ingredient>?
     
     // MARK: - Initialization
     init(completion: @escaping () -> Void,
@@ -104,6 +105,8 @@ class RecipeFormViewController: UIViewController {
         setupCoordinator()
         setupNavigationBar()
         setupTableView()
+        setupDataSource()
+        setupBindings()
     }
     
     // MARK: - Setup UI
@@ -121,12 +124,12 @@ class RecipeFormViewController: UIViewController {
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
         
-        view.addSubview(ingredientsTableView)
+        view.addSubview(tableView)
         NSLayoutConstraint.activate([
-            ingredientsTableView.topAnchor.constraint(equalTo: stackView.bottomAnchor, constant: 16),
-            ingredientsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            ingredientsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            ingredientsTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.topAnchor.constraint(equalTo: stackView.bottomAnchor, constant: 16),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
         selectIngredientsButton.addTarget(self, action: #selector(onSelectIngredientTap), for: .touchUpInside)
@@ -154,7 +157,7 @@ class RecipeFormViewController: UIViewController {
     }
     
     private func setupTableView() {
-        ingredientsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
     }
     
     private func setupNavigationBar() {
@@ -164,9 +167,7 @@ class RecipeFormViewController: UIViewController {
     // MARK: - Actions
     
     @objc private func onSelectIngredientTap() {
-        coordinator.presentSelectIngredient(with: viewModel.viewState.selectedIngredients) {
-            
-        }
+        openSelectIngredient()
     }
     
     @objc private func didTapSaveButton() {
@@ -175,4 +176,53 @@ class RecipeFormViewController: UIViewController {
             navigationController?.popViewController(animated: true)
         }
     }
+    
+    private func openSelectIngredient() {
+        coordinator.presentSelectIngredient(with: viewModel.viewState.selectedIngredients) { [weak self] ingredients in
+            self?.viewModel.viewState.selectedIngredients = ingredients
+        }
+    }
+    
+    // MARK: - Table
+    
+    private func setupDataSource() {
+        dataSource = UITableViewDiffableDataSource<Int, Ingredient>(tableView: tableView) { tableView, indexPath, ingredient in
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+            cell.textLabel?.text = ingredient.name
+            return cell
+        }
+    }
+
+    private func setupBindings() {
+        viewModel.viewState.$selectedIngredients
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] ingredients in
+                self?.dataSource?.updateDataSource(with: ingredients)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func setupTableViewDelegate() {
+        tableView.delegate = self
+    }
+}
+
+extension RecipeFormViewController: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        openSelectIngredient()
+    }
+
+//    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+//        guard let recipe = dataSource?.itemIdentifier(for: indexPath) else { return nil }
+//        
+//        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completionHandler in
+//            self?.viewModel.delete(recipe)
+//            self?.dataSource?.deleteItem(recipe)
+//            
+//            completionHandler(true)
+//        }
+//        
+//        return UISwipeActionsConfiguration(actions: [deleteAction])
+//    }
 }
