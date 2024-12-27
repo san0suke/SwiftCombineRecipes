@@ -217,6 +217,13 @@ class RecipeFormViewController: UIViewController {
                 self?.dataSource?.updateDataSource(with: ingredients)
             }
             .store(in: &cancellables)
+        
+        viewModel.viewState.$isSaveButtonEnabled
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] enabled in
+                self?.saveButton.isEnabled = enabled
+            }
+            .store(in: &cancellables)
     }
 
     private func setupTableViewDelegate() {
