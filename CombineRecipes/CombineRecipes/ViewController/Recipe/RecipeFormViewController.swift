@@ -107,6 +107,7 @@ class RecipeFormViewController: UIViewController {
         setupTableView()
         setupDataSource()
         setupBindings()
+        setupTableViewDelegate()
     }
     
     // MARK: - Setup UI
@@ -179,7 +180,7 @@ class RecipeFormViewController: UIViewController {
     
     private func openSelectIngredient() {
         coordinator.presentSelectIngredient(with: viewModel.viewState.selectedIngredients) { [weak self] ingredients in
-            self?.viewModel.viewState.selectedIngredients = ingredients
+            self?.viewModel.updateSelectedIngredients(ingredients)
         }
     }
     

@@ -13,6 +13,7 @@ protocol RecipeFormViewModelProtocol: AnyObject {
     var isEditing: Bool { get }
     var recipeSubject: CurrentValueSubject<Recipe?, Never> { get }
     
+    func updateSelectedIngredients(_ ingredients: [Ingredient])
     func save() -> Bool
 }
 
@@ -53,6 +54,10 @@ class RecipeFormViewModel: RecipeFormViewModelProtocol {
             .map { !$0.isEmpty }
             .removeDuplicates()
             .assign(to: &viewState.$isSaveButtonEnabled)
+    }
+    
+    func updateSelectedIngredients(_ ingredients: [Ingredient]) {
+        viewState.selectedIngredients = ingredients.sorted { $0.name ?? "" < $1.name ?? "" }
     }
     
     // MARK: - Create or Update Recipe
