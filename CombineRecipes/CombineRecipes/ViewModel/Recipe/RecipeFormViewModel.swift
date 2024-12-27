@@ -21,6 +21,7 @@ class RecipeFormViewModel: RecipeFormViewModelProtocol {
     class ViewState {
         @Published var isSaveButtonEnabled: Bool = false
         @Published var recipeName: String = ""
+        @Published var selectedIngredients: [Ingredient] = []
     }
     
     private(set) var viewState = ViewState()

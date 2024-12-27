@@ -73,15 +73,18 @@ class RecipeFormViewController: UIViewController {
     }()
     
     private let completion: () -> Void
-    
     private let cancellables = Set<AnyCancellable>()
-    private let viewModel: RecipeFormViewModel
+    private let viewModel: RecipeFormViewModelProtocol
+    private let coordinator: RecipeFormCoordinatorProtocol
     
     // MARK: - Initialization
-    init(completion: @escaping () -> Void, recipe: Recipe? = nil) {
+    init(completion: @escaping () -> Void,
+         recipe: Recipe? = nil,
+         coordinator: RecipeFormCoordinatorProtocol = RecipeFormCoordinator()) {
         self.completion = completion
         self.viewModel = RecipeFormViewModel()
         self.viewModel.recipeSubject.send(recipe)
+        self.coordinator = coordinator
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -125,7 +128,7 @@ class RecipeFormViewController: UIViewController {
             ingredientsTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-//        selectIngredientsButton.addTarget(self, action: #selector(onSelectIngredientTap), for: .touchUpInside)
+        selectIngredientsButton.addTarget(self, action: #selector(onSelectIngredientTap), for: .touchUpInside)
     }
 
     
@@ -154,26 +157,23 @@ class RecipeFormViewController: UIViewController {
         navigationItem.rightBarButtonItem = saveButton
     }
     
-//    // MARK: - Actions
-//    
-//    @objc private func onSelectIngredientTap() {
-//        openSelectIngredientModal()
-//    }
-//    
-//    @objc private func didTapSaveButton() {
-//        if viewModel.save() {
-//            completion()
-//            navigationController?.popViewController(animated: true)
-//        }
-//    }
-//    
-//    private func openSelectIngredientModal() {
-//        let viewController = SelectIngredientViewController(selectedIngredients: viewModel.selectedIngredientsRelay.value) { [weak self] ingredients in
-//            guard let self = self else { return }
-//            
+    // MARK: - Actions
+    
+    @objc private func onSelectIngredientTap() {
+        let viewController = SelectIngredientViewController(selectedIngredients: viewModel.viewState.selectedIngredients) {
+            [weak self] ingredients in
+            guard let self = self else { return }
+            
 //            viewModel.update(ingredients)
-//        }
-//        
-//        navigationController?.presentMediumModal(viewController)
-//    }
+        }
+        
+        navigationController?.presentMediumModal(viewController)
+    }
+    
+    @objc private func didTapSaveButton() {
+        if viewModel.save() {
+            completion()
+            navigationController?.popViewController(animated: true)
+        }
+    }
 }
