@@ -59,6 +59,28 @@ class IngredientListViewControllerTests: XCTestCase {
         XCTAssertNotNil(viewController.dataSource)
     }
     
+    func testListTableShouldHave2Elements() {
+        let updateExpectation = expectation(description: "Save button enabled")
+        let expectedIngredients = [Ingredient(context: mockContext), Ingredient(context: mockContext)]
+        
+        mockViewModel.ingredients
+            .receive(on: DispatchQueue.main)
+            .dropFirst()
+            .sink { ingredients in
+                XCTAssertEqual(expectedIngredients, ingredients)
+                updateExpectation.fulfill()
+            }
+            .store(in: &cancellables)
+    
+        _ = createViewController()
+        
+        mockViewModel.ingredients.send(expectedIngredients)
+        
+        waitForExpectations(timeout: 3)
+        
+        XCTAssertEqual(mockTableView.numberOfRows(inSection: 0), 2)
+    }
+    
     private func createViewController() -> IngredientListViewController {
         let viewController = IngredientListViewController(tableView: mockTableView,
                                                           viewModel: mockViewModel,
