@@ -14,7 +14,7 @@ class IngredientListViewController: UIViewController {
     private let tableView: UITableView
     private let viewModel: IngredientListViewModelProtocol
 
-    private var dataSource: UITableViewDiffableDataSource<Int, Ingredient>?
+    private(set) var dataSource: UITableViewDiffableDataSource<Int, Ingredient>?
     private var cancellables = Set<AnyCancellable>()
 
     init(tableView: UITableView = UITableView(frame: .zero, style: .insetGrouped),
