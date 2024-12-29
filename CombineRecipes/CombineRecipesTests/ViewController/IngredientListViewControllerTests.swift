@@ -37,10 +37,16 @@ class IngredientListViewControllerTests: XCTestCase {
     
     func testTapOnAddShouldPresentForm() {
         let presentExpectation = expectation(description: "Should present form")
+        let fetchExpectation = expectation(description: "Should fetch")
         let viewController = createViewController()
         
         mockCoordinator.presentIngredientFormCompletion = { ingredient, completion in
             presentExpectation.fulfill()
+            completion()
+        }
+        
+        mockViewModel.fetchCompletion = {
+            fetchExpectation.fulfill()
         }
         
         guard let addButton = viewController.navigationItem.rightBarButtonItem else {
